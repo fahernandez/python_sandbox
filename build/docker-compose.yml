@@ -1,0 +1,42 @@
+version: "3.7"
+services:
+  full_stack:
+    build:
+      context: .
+      dockerfile: Dockerfile-python
+    image: full_stack:1.0.0
+    container_name: full_stack
+    volumes:
+      - ../python/:/home/full-stack/python
+      - ../data:/home/full-stack/data
+    working_dir: /home/full-stack
+    ports:
+      - 8888:8888
+    environment:
+      - TARGET=LIVE
+      - JUPYTER_ENABLE_LAB=yes
+      - CHOWN_HOME=yes
+      - NB_UID=1000
+      - NB_USER=full-stack
+      - DATABASE_URL=mysql+pymysql://full_stack:full_stack@db:3306/full_stack
+    networks:
+      - full-stack
+  db:
+    image: mysql:8.0.31
+    command: --default-authentication-plugin=mysql_native_password --secure-file-priv=""
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - ../database/:/docker-entrypoint-initdb.d
+      - ../data:/data/
+    environment:
+      MYSQL_ROOT_PASSWORD: dsd311
+      MYSQL_DATABASE: full_stack
+      MYSQL_USER: full_stack
+      MYSQL_PASSWORD: full_stack
+    networks:
+      - full-stack
+networks:
+  full-stack:
+      name: full-stack
